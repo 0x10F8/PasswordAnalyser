@@ -7,7 +7,7 @@ from panalyser import analysistools
 from pafiletools import filetools
 from paprogressbar import progressbar
 from json import dumps
-from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor
 
 # Check arguments
 if len(argv) < 3:
@@ -20,7 +20,8 @@ OUTPUT_FILE = argv[2]
 
 # Create a list of the analysis methods we will use
 analysis_methods = [analysistools.get_zxcvbn_analysis,
-                    analysistools.get_hibp_analysis]
+                    analysistools.get_hibp_analysis,
+                    analysistools.get_character_types_used]
 
 process_pool = ThreadPoolExecutor(max_workers=50)
 

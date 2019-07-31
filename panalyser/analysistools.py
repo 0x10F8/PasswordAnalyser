@@ -2,10 +2,23 @@ from zxcvbn import zxcvbn
 from palogging import palog
 from decimal import Decimal
 from datetime import timedelta
-from re import Match
+from re import Match, compile
 from hashlib import sha1
 
 HIBP_FILE_FMT = "./hibp/{0}/{1}/{2}"
+
+
+def get_character_types_used(password):
+    output_dict = {}
+    lp = compile(".*[a-z].*")
+    up = compile(".*[A-Z].*")
+    np = compile(".*[0-9].*")
+    sp = compile(".*\W.*")
+    output_dict["lower"] = True if lp.match(password) else False
+    output_dict["upper"] = True if up.match(password) else False
+    output_dict["numeric"] = True if np.match(password) else False
+    output_dict["symbol"] = True if sp.match(password) else False
+    return output_dict
 
 
 def get_hibp_count(hibp_list, sha1_hash):
