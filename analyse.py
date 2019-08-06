@@ -26,13 +26,12 @@ analysis_methods = [analysistools.get_zxcvbn_analysis,
 process_pool = ThreadPoolExecutor(max_workers=50)
 
 
-def do_analysis(password):
-    info_dict = {}
+def do_analysis(user_id, password):
+    info_dict = {"user_id": user_id}
     for analysis_method in analysis_methods:
         info_dict.update(analysis_method(password))
     output = dumps(info_dict)
     return output
-
 
 def start_analysis():
     # Get the number of passwords to analyse
@@ -45,11 +44,15 @@ def start_analysis():
         with open(INPUT_PASSWORD_LIST, 'r', 1024, encoding="utf8", errors="ignore") as password_list:
             while True:
                 # Get a password from the list
-                password = filetools.clean_input(password_list.readline())
+                line = filetools.clean_input(password_list.readline())
                 # Stop analysis if we are done
-                if not password:
+                if not line:
                     break
-                results.append(process_pool.submit(do_analysis, password))
+                tokenized = line.split(":", 1)
+                user_id = tokenized[0]
+                password = tokenized[1]
+                results.append(process_pool.submit(
+                    do_analysis, user_id, password))
         for result in results:
             data_list.writelines(result.result() + "\n")
             password_index += 1
