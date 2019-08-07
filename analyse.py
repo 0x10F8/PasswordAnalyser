@@ -8,6 +8,7 @@ from pafiletools import filetools
 from paprogressbar import progressbar
 from json import dumps
 from concurrent.futures import ThreadPoolExecutor
+import sys
 
 # Check arguments
 if len(argv) < 3:
@@ -24,7 +25,22 @@ analysis_methods = [analysistools.get_zxcvbn_analysis,
                     analysistools.get_character_types_used]
 
 process_pool = ThreadPoolExecutor(max_workers=50)
+seperators = [':', ';', '|']
 
+def get_indexes_of_seperators(line):
+    indexes = {}
+    for seperator in seperators:
+        indexes[seperator] = line.find(seperator)
+    return indexes
+
+
+def pick_seperator(indexes):
+    seperator = None
+    seperatorIndex = sys.maxsize
+    for key in indexes.keys():
+        if indexes[key] > 0 and indexes[key] < seperatorIndex:
+            seperator = key
+    return seperator
 
 def do_analysis(user_id, password):
     info_dict = {"user_id": user_id}
@@ -48,7 +64,11 @@ def start_analysis():
                 # Stop analysis if we are done
                 if not line:
                     break
-                tokenized = line.split(":", 1)
+                if line and len(line) > 0 and line[0] in seperators:
+                    line = line[1:]
+                indexes = get_indexes_of_seperators(line)
+                seperator = pick_seperator(indexes)
+                tokenized = line.split(seperator, 1)
                 user_id = tokenized[0]
                 password = tokenized[1]
                 results.append(process_pool.submit(
