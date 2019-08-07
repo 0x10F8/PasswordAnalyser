@@ -71,8 +71,9 @@ def start_analysis():
                 tokenized = line.split(seperator, 1)
                 user_id = tokenized[0]
                 password = tokenized[1]
-                results.append(process_pool.submit(
-                    do_analysis, user_id, password))
+                if password is not None and len(password) > 0:
+                    results.append(process_pool.submit(
+                        do_analysis, user_id, password))
         for result in results:
             data_list.writelines(result.result() + "\n")
             password_index += 1
